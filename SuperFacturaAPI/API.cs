@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,8 +23,11 @@ namespace SuperFactura
             APIResult apiResult = new APIResult();
             apiResult.folio = 123; // Se debe obtener de la salida del comando
 
-            // TODO: Gardar data en archivo temporal en file
-            string file = "temp.txt";
+            string fileName = System.IO.Path.GetTempFileName();
+
+            System.IO.StreamWriter file = new System.IO.StreamWriter(fileName);
+            file.WriteLine(data);
+            file.Close();
 
             // Ejecutar comando
             Process p = new Process();
@@ -31,7 +35,7 @@ namespace SuperFactura
             p.StartInfo.UseShellExecute = false;
             // p.StartInfo.CreateNoWindow = true;
             p.StartInfo.RedirectStandardOutput = true;
-            string args = EscapeArgument(user) + " " + EscapeArgument(password) + " " + EscapeArgument(ambiente) + " " + EscapeArgument(file);
+            string args = EscapeArgument(user) + " " + EscapeArgument(password) + " " + EscapeArgument(ambiente) + " " + EscapeArgument(fileName);
             /* TODO: Soportar opciones adicionales
             if (options)
             {
@@ -40,19 +44,24 @@ namespace SuperFactura
             */
             p.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "libs\\superfactura.exe";
             p.StartInfo.Arguments = args;
+
+            string output;
+
             try
             {
                 p.Start();
+                output = p.StandardOutput.ReadToEnd();
+                p.WaitForExit();
             } catch(Exception e)
             {
                 Console.WriteLine("ERROR: No se pudo ejecutar el comando: " + p.StartInfo.FileName);
                 return apiResult;
+            } finally
+            {
+                File.Delete(fileName);
             }
 
-            string output = p.StandardOutput.ReadToEnd();
-            p.WaitForExit();
-
-            Console.Out.WriteLine("OUTPUT:\n" + output);
+            Console.Out.WriteLine("API OUTPUT:\n" + output);
 
             return apiResult;
         }
@@ -60,6 +69,7 @@ namespace SuperFactura
         public string EscapeArgument(string arg)
         {
             // TODO: Escapar
+            // arg = arg.Replace("\\", "\\\\");
             return "\"" + arg + "\"";
         }
     }
