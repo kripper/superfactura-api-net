@@ -52,10 +52,12 @@ namespace SuperFactura
                 p.Start();
                 output = p.StandardOutput.ReadToEnd();
                 p.WaitForExit();
+
             } catch(Exception e)
             {
                 Console.WriteLine("ERROR: No se pudo ejecutar el comando: " + p.StartInfo.FileName);
                 return apiResult;
+
             } finally
             {
                 File.Delete(fileName);
@@ -63,14 +65,31 @@ namespace SuperFactura
 
             Console.Out.WriteLine("API OUTPUT:\n" + output);
 
+            int folio = ParseFolio(output);
+            if(folio != 0)
+            {
+                apiResult.ok = true;
+                apiResult.folio = folio;
+            }
             return apiResult;
         }
 
-        public string EscapeArgument(string arg)
+        private string EscapeArgument(string arg)
         {
-            // TODO: Escapar
-            // arg = arg.Replace("\\", "\\\\");
+            arg = arg.Replace("\"", "\\\"");
             return "\"" + arg + "\"";
+        }
+
+        private int ParseFolio(string output)
+        {
+            string startToken = "<folio>";
+            string endToken = "</folio>";
+            int startIndex = output.IndexOf(startToken);
+            if (startIndex == -1) return 0; // ERROR:
+            var endIndex = output.IndexOf(endToken, startIndex);
+            int valueIndex = startIndex + startToken.Length;
+            string value = output.Substring(valueIndex, endIndex - valueIndex);
+            return int.Parse(value);
         }
     }
 
