@@ -11,6 +11,7 @@ namespace SuperFactura
     public class API
     {
         private string user, password;
+        string jsonOptions = "";
 
         public API(string user, string password)
         {
@@ -18,10 +19,22 @@ namespace SuperFactura
             this.password = password;
         }
 
-        public APIResult SendDTE(string data, string ambiente, string jsonOptions = "")
+        public void SetSavePDF(string outputFile)
         {
+            AddJSONOption("savePDF", outputFile);
+        }
+
+        private void AddJSONOption(string key, string val)
+        {
+            if (jsonOptions != "") jsonOptions += ",";
+            jsonOptions += EscapeArgument(key) + ":" + EscapeArgument(val);
+        }
+
+        public APIResult SendDTE(string data, string ambiente)
+        {
+            AddJSONOption("encoding", "UTF-8");
+
             APIResult apiResult = new APIResult();
-            apiResult.folio = 123; // Se debe obtener de la salida del comando
 
             string fileName = System.IO.Path.GetTempFileName();
 
@@ -33,13 +46,14 @@ namespace SuperFactura
             Process p = new Process();
 
             p.StartInfo.UseShellExecute = false;
-            // p.StartInfo.CreateNoWindow = true;
+            p.StartInfo.CreateNoWindow = true;
             p.StartInfo.RedirectStandardOutput = true;
             string args = EscapeArgument(user) + " " + EscapeArgument(password) + " " + EscapeArgument(ambiente) + " " + EscapeArgument(fileName);
             if (jsonOptions != "")
             {
-                args += " " + EscapeArgument(jsonOptions);
+                args += " " + EscapeArgument("{" + jsonOptions + "}");
             }
+
             p.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "libs\\superfactura.exe";
             p.StartInfo.Arguments = args;
 
@@ -61,31 +75,33 @@ namespace SuperFactura
                 File.Delete(fileName);
             }
 
-            Console.Out.WriteLine("API OUTPUT:\n" + output);
-
             int folio = ParseFolio(output);
             if(folio != 0)
             {
                 apiResult.ok = true;
                 apiResult.folio = folio;
+            } else
+            {
+                Console.Out.WriteLine("ERROR: API OUTPUT:\n" + output);
             }
             return apiResult;
         }
 
         private string EscapeArgument(string arg)
         {
+            arg = arg.Replace("\\", "\\\\");
             arg = arg.Replace("\"", "\\\"");
             return "\"" + arg + "\"";
         }
 
         private int ParseFolio(string output)
         {
-            string startToken = "<folio>";
-            string endToken = "</folio>";
+            string startToken = "\"folio\":\"";
+            string endToken = "\"";
             int startIndex = output.IndexOf(startToken);
             if (startIndex == -1) return 0; // ERROR:
-            var endIndex = output.IndexOf(endToken, startIndex);
             int valueIndex = startIndex + startToken.Length;
+            var endIndex = output.IndexOf(endToken, valueIndex);
             string value = output.Substring(valueIndex, endIndex - valueIndex);
             return int.Parse(value);
         }

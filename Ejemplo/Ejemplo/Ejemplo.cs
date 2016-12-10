@@ -7,11 +7,11 @@ using SuperFactura;
 
 namespace Ejemplo
 {
-    class Program
+    class Ejemplo
     {
         static void Main(string[] args)
         {
-            API api = new API("usuario@cliente.cl", "contraseña");
+            API api = new API("usuario@cliente.cl", "mypassword");
 
             string json = @"
 {
@@ -50,10 +50,17 @@ namespace Ejemplo
 }
 ";
 
-            APIResult res = api.SendDTE(json, "cer", "{\"getPDF\": 1}");
+            // Solicitar descarga del PDF
+            api.SetSavePDF(@"C:\Users\kripp\Desktop\dte-123");
+
+            APIResult res = api.SendDTE(json, "cer");
+
             if (res.ok)
             {
                 Console.WriteLine("Se creó el DTE con folio " + res.folio);
+            } else
+            {
+                Console.WriteLine("ERROR: Respuesta incorrecta");
             }
         }
     }
