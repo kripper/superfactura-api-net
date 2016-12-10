@@ -50,7 +50,7 @@ namespace Ejemplo
 }
 ";
 
-            APIResult res = api.SendDTE(json, "cer");
+            APIResult res = api.SendDTE(json, "cer", "{\"getPDF\": 1}");
             if (res.ok)
             {
                 Console.WriteLine("Se creó el DTE con folio " + res.folio);

@@ -18,7 +18,7 @@ namespace SuperFactura
             this.password = password;
         }
 
-        public APIResult SendDTE(string data, string ambiente)
+        public APIResult SendDTE(string data, string ambiente, string jsonOptions = "")
         {
             APIResult apiResult = new APIResult();
             apiResult.folio = 123; // Se debe obtener de la salida del comando
@@ -36,12 +36,10 @@ namespace SuperFactura
             // p.StartInfo.CreateNoWindow = true;
             p.StartInfo.RedirectStandardOutput = true;
             string args = EscapeArgument(user) + " " + EscapeArgument(password) + " " + EscapeArgument(ambiente) + " " + EscapeArgument(fileName);
-            /* TODO: Soportar opciones adicionales
-            if (options)
+            if (jsonOptions != "")
             {
-                args += " " + EscapeArgument(options);
+                args += " " + EscapeArgument(jsonOptions);
             }
-            */
             p.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "libs\\superfactura.exe";
             p.StartInfo.Arguments = args;
 
