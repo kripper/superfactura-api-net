@@ -38,7 +38,7 @@ namespace SuperFactura
                 args += " " + EscapeArgument(options);
             }
             */
-            p.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "..\\api\\superfactura.exe";
+            p.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "libs\\superfactura.exe";
             p.StartInfo.Arguments = args;
             try
             {
@@ -46,6 +46,7 @@ namespace SuperFactura
             } catch(Exception e)
             {
                 Console.WriteLine("ERROR: No se pudo ejecutar el comando: " + p.StartInfo.FileName);
+                return apiResult;
             }
 
             string output = p.StandardOutput.ReadToEnd();
@@ -66,6 +67,6 @@ namespace SuperFactura
     public class APIResult
     {
         public int folio; // Entrega el folio asignado al DTE.
-        public bool ok; // Indica que el DTE se generó correctamente.
+        public bool ok = false; // Indica que el DTE se generó correctamente.
     }
 }
