@@ -4,4 +4,4 @@ Clase .NET que simplifica la ejecución del comando superfactura.exe, especialme
 
 Autores: Ignacio Alvarez y Christopher Pereira.
 
-LICENSE: BSD
+Licencia: BSD 3
