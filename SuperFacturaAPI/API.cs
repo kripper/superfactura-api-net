@@ -65,10 +65,9 @@ namespace SuperFactura
                 output = p.StandardOutput.ReadToEnd();
                 p.WaitForExit();
 
-            } catch(Exception e)
+            } catch(Exception)
             {
-                Console.WriteLine("ERROR: No se pudo ejecutar el comando: " + p.StartInfo.FileName);
-                return apiResult;
+				throw new Exception("ERROR: No se pudo ejecutar el comando: " + p.StartInfo.FileName);
 
             } finally
             {
@@ -82,7 +81,7 @@ namespace SuperFactura
                 apiResult.folio = folio;
             } else
             {
-                Console.Out.WriteLine("ERROR: API OUTPUT:\n" + output);
+                throw new Exception(output);
             }
             return apiResult;
         }

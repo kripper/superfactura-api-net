@@ -13,7 +13,7 @@ namespace Ejemplo
         {
             API api = new API("usuario@cliente.cl", "mypassword");
 
-            string json = @"
+			string json = @"
 {
 	""Encabezado"" : {
 		""IdDoc"" : {
@@ -50,18 +50,19 @@ namespace Ejemplo
 }
 ";
 
-            // Solicitar descarga del PDF
-            api.SetSavePDF(@"C:\Users\kripp\Desktop\dte-123");
-
-            APIResult res = api.SendDTE(json, "cer");
-
-            if (res.ok)
+			try
             {
-                Console.WriteLine("Se creó el DTE con folio " + res.folio);
-            } else
-            {
-                Console.WriteLine("ERROR: Respuesta incorrecta");
+                // Solicitar descarga del PDF
+                api.SetSavePDF(@"C:\Users\kripp\Desktop\dte-123");
+
+                APIResult res = api.SendDTE(json, "cer");
+
+				Console.WriteLine("Se creó el DTE con folio " + res.folio);
             }
-        }
+			catch(Exception e)
+			{
+				Console.WriteLine(e.Message);
+			}
+		}
     }
 }
