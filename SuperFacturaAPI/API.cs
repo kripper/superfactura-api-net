@@ -137,7 +137,7 @@ namespace SuperFactura
 
 				if (saveXML != null)
 				{
-					WriteFile(saveXML + ".xml", appRes.xml);
+					WriteFile(saveXML + ".xml", Encoding.Conver‌​t(Encoding.UTF8, Encoding.GetEncoding("ISO-8859-1"), Encoding.UTF8.GetBytes(appRes.xml)));
 				}
 
 			}
