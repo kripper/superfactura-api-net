@@ -11,7 +11,18 @@ namespace Ejemplo
     {
         static void Main(string[] args)
         {
-            API api = new API("usuario@cliente.cl", "mypassword");
+            API api = new API("usuario@cliente.cl", "mynewpassword");
+
+			// Enviar documentID (importante para evitar documentos duplicados en caso de falla de red y reenvío):
+			// Si se envía un ID ya utilizado, se retornará el mismo documento, en vez de crear uno nuevo.
+			string documentID = "F123";
+			api.SetOption("documentID", documentID);
+
+			// Solicitar descarga del PDF
+			api.SetSavePDF(@"C:\Users\kripp\Desktop\dte-" + documentID);
+
+			// Solicitar descarga del XML firmado
+			api.SetSaveXML(@"C:\Users\kripp\Desktop\dte-" + documentID);
 
 			string json = @"
 {
@@ -52,10 +63,7 @@ namespace Ejemplo
 
 			try
             {
-                // Solicitar descarga del PDF
-                api.SetSavePDF(@"C:\Users\kripp\Desktop\dte-123");
-
-                APIResult res = api.SendDTE(json, "cer");
+				APIResult res = api.SendDTE(json, "cer");
 
 				Console.WriteLine("Se creó el DTE con folio " + res.folio);
             }

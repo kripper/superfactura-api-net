@@ -29,16 +29,16 @@ namespace SuperFactura
 		public void SetSavePDF(string outputFile)
 		{
 			savePDF = outputFile;
-			AddJSONOption("getPDF", "1");
+			SetOption("getPDF", "1");
 		}
 
 		public void SetSaveXML(string outputFile)
 		{
 			saveXML = outputFile;
-			AddJSONOption("getXML", "1");
+			SetOption("getXML", "1");
 		}
 
-		private void AddJSONOption(string key, string val)
+		public void SetOption(string key, string val)
 		{
 			if (jsonOptions != "") jsonOptions += ",";
 			jsonOptions += EscapeArgument(key) + ":" + EscapeArgument(val);
@@ -88,8 +88,8 @@ namespace SuperFactura
 
 		public APIResult SendDTE(string jsonData, string ambiente)
 		{
-			AddJSONOption("ambiente", ambiente);
-			AddJSONOption("encoding", "UTF-8");
+			SetOption("ambiente", ambiente);
+			SetOption("encoding", "UTF-8");
 
 			APIResult apiResult = new APIResult();
 
