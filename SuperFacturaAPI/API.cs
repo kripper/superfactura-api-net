@@ -158,28 +158,28 @@ namespace SuperFactura
 
 			dynamic appRes = obj.response;
 
-			if (appRes.ok == "1")
+			if ((string)appRes.ok == "1")
 			{
 				int folio = Convert.ToInt32(appRes.folio);
 
 				apiResult.ok = true;
 				apiResult.folio = folio;
-				apiResult.xml = appRes.xml;
-				apiResult.escpos = appRes.escpos;
+				apiResult.xml = (string)appRes.xml;
+				apiResult.escpos = (string)appRes.escpos;
 
 				if (savePDF != null)
 				{
-					WriteFile(savePDF + ".pdf", Convert.FromBase64String(appRes.pdf));
+					WriteFile(savePDF + ".pdf", Convert.FromBase64String((string)appRes.pdf));
 
-					if (appRes.pdfCedible != null)
+					if ((string)appRes.pdfCedible != null)
 					{
-						WriteFile(savePDF + "-cedible.pdf", Convert.FromBase64String(appRes.pdfCedible));
+						WriteFile(savePDF + "-cedible.pdf", Convert.FromBase64String((string)appRes.pdfCedible));
 					}
 				}
 
 				if (saveXML != null)
 				{
-					WriteFile(saveXML + ".xml", Encoding.Conver‌​t(Encoding.UTF8, Encoding.GetEncoding("ISO-8859-1"), Encoding.UTF8.GetBytes(appRes.xml)));
+					WriteFile(saveXML + ".xml", Encoding.Conver‌​t(Encoding.UTF8, Encoding.GetEncoding("ISO-8859-1"), Encoding.UTF8.GetBytes((string)appRes.xml)));
 				}
 
 			}
@@ -217,7 +217,6 @@ namespace SuperFactura
 		public bool ok = false; // Indica que el DTE se generó correctamente.
 		public string xml;
 		public string escpos;
-
 
 		public bool PrintEscPos(String port)
 		{

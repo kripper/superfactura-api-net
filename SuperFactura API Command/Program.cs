@@ -69,6 +69,11 @@ Envíe sus consultas a: soporte@superfactura.cl
 					api.SetSavePDF((string)options.savePDF);
 				}
 
+				if (options.saveXML != null)
+				{
+					api.SetSaveXML((string)options.saveXML);
+				}
+
 				printer = GetAndRemove(options, "printer");
 				if (printer != null)
 				{
