@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 using System.IO.Compression;
-using System.Web.Script.Serialization;
-using System.Web;
+using Microsoft.Win32.SafeHandles;
+using System.Runtime.InteropServices;
+using Newtonsoft.Json;
 
 namespace SuperFactura
 {
@@ -17,11 +14,30 @@ namespace SuperFactura
 	{
 		private string user, password;
 		string jsonOptions = "";
+		string additionalJsonOptions = null;
 		string savePDF = null;
 		string saveXML = null;
 
+		string url;
+
+		// Conexión a la nube
 		public API(string user, string password)
 		{
+			this.user = user;
+			this.password = password;
+			url = "https://superfactura.cl";
+		}
+
+		// Conexión al Servidor Local
+		public API(string host, int port)
+		{
+			url = "http://" + host + ":" + port;
+		}
+
+		// Conexión a un seridor específico
+		public API(string url, string user, string password)
+		{
+			this.url = url;
 			this.user = user;
 			this.password = password;
 		}
@@ -38,17 +54,27 @@ namespace SuperFactura
 			SetOption("getXML", "1");
 		}
 
+		public void AddOptions(string json)
+		{
+			additionalJsonOptions = json;
+		}
+
 		public void SetOption(string key, string val)
 		{
 			if (jsonOptions != "") jsonOptions += ",";
 			jsonOptions += EscapeArgument(key) + ":" + EscapeArgument(val);
 		}
 
+		public void SetOption(string key, bool val)
+		{
+			SetOption(key, val ? "1" : "");
+		}
+
 		private string SendRequest(string jsonData, string jsonOptions)
 		{
 			using (WebClient client = new WebClient())
 			{
-				byte[] response = client.UploadValues("https://superfactura.cl?a=json", new NameValueCollection()
+				byte[] response = client.UploadValues(url + "?a=json", new NameValueCollection()
 				{
 					{ "user", user },
 					{ "pass", password },
@@ -90,6 +116,7 @@ namespace SuperFactura
 		{
 			SetOption("ambiente", ambiente);
 			SetOption("encoding", "UTF-8");
+			SetOption("getXML", true);
 
 			APIResult apiResult = new APIResult();
 
@@ -98,15 +125,27 @@ namespace SuperFactura
 
 			try
 			{
-				output = SendRequest(jsonData, "{" + jsonOptions + "}");
+				if (additionalJsonOptions != null)
+				{
+					additionalJsonOptions = additionalJsonOptions.Trim();
+					if (additionalJsonOptions != "")
+					{
+						jsonOptions += ", " + additionalJsonOptions.Trim().TrimStart('{').TrimEnd('}');
+					}
+				}
 
-				var serializer = new JavaScriptSerializer();
-				serializer.RegisterConverters(new[] { new DynamicJsonConverter() });
+				jsonOptions = "{" + jsonOptions + "}";
 
-				obj = serializer.Deserialize(output, typeof(object));
+				output = SendRequest(jsonData, jsonOptions);
+
+				// var serializer = new JavaScriptSerializer();
+				// serializer.RegisterConverters(new[] { new DynamicJsonConverter() });
+				// obj = serializer.Deserialize(output, typeof(object));
+				obj = JsonConvert.DeserializeObject(output);
+
 				if (obj.ack != "ok")
 				{
-					string text = obj.response.title != "" ? obj.response.title + " - " : "" + obj.response.message;
+					string text = (obj.response.title != "" ? obj.response.title + " - " : "") + obj.response.message;
 					throw new Exception("ERROR: " + text);
 				}
 
@@ -119,19 +158,22 @@ namespace SuperFactura
 
 			dynamic appRes = obj.response;
 
-			int folio = Convert.ToInt32(appRes.folio);
 			if (appRes.ok == "1")
 			{
+				int folio = Convert.ToInt32(appRes.folio);
+
 				apiResult.ok = true;
 				apiResult.folio = folio;
+				apiResult.xml = appRes.xml;
+				apiResult.escpos = appRes.escpos;
 
 				if (savePDF != null)
 				{
-					WriteFile(savePDF + ".pdf", DecodeBase64(appRes.pdf));
+					WriteFile(savePDF + ".pdf", Convert.FromBase64String(appRes.pdf));
 
 					if (appRes.pdfCedible != null)
 					{
-						WriteFile(savePDF + "-cedible.pdf", DecodeBase64(appRes.pdfCedible));
+						WriteFile(savePDF + "-cedible.pdf", Convert.FromBase64String(appRes.pdfCedible));
 					}
 				}
 
@@ -143,14 +185,9 @@ namespace SuperFactura
 			}
 			else
 			{
-				throw new Exception(output);
+				throw new Exception("WRONG OUTPUT: " + output);
 			}
 			return apiResult;
-		}
-
-		private byte[] DecodeBase64(string base64)
-		{
-			return System.Convert.FromBase64String(base64);
 		}
 
 		private void WriteFile(string filename, byte[] content)
@@ -167,11 +204,50 @@ namespace SuperFactura
 			arg = arg.Replace("\"", "\\\"");
 			return "\"" + arg + "\"";
 		}
+
+		public void TestPrinter(string port)
+		{
+			SendRequest("", "{\"cmd\":\"test-escpos\"}");
+		}
 	}
 
 	public class APIResult
 	{
 		public int folio; // Entrega el folio asignado al DTE.
 		public bool ok = false; // Indica que el DTE se generó correctamente.
+		public string xml;
+		public string escpos;
+
+
+		public bool PrintEscPos(String port)
+		{
+			Print2LPT.Print(port, Convert.FromBase64String(escpos));
+			return true;
+		}
+	}
+
+	public static class Print2LPT
+	{
+		[DllImport("kernel32.dll", SetLastError = true)]
+		static extern SafeFileHandle CreateFile(string lpFileName, FileAccess dwDesiredAccess, uint dwShareMode, IntPtr lpSecurityAttributes, FileMode dwCreationDisposition, uint dwFlagsAndAttributes, IntPtr hTemplateFile);
+
+		public static void Print(String port, byte[] data)
+		{
+			try
+			{
+				SafeFileHandle fh = CreateFile(port, FileAccess.Write, 0, IntPtr.Zero, FileMode.OpenOrCreate, 0, IntPtr.Zero);
+				if (!fh.IsInvalid)
+				{
+					FileStream fs = new FileStream(fh, FileAccess.ReadWrite);
+					fs.Write(data, 0, data.Length);
+					fs.Close();
+				}
+
+			}
+			catch (Exception ex)
+			{
+				string message = ex.Message;
+			}
+		}
 	}
 }
