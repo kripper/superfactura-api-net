@@ -14,7 +14,8 @@ namespace Ejemplos
     {
         static void Main(string[] args)
         {
-			API api = new API("127.0.0.1", 9080);
+			// No se envía usuario ni contraseña, ya que estos datos serán centralizados en el servidor.
+			API api = new API("http://127.0.0.1:9080");
 
 			// Enviar documentID (importante para evitar documentos duplicados en caso de falla de red y reenvío):
 			// Si se envía un ID ya utilizado, se retornará el mismo documento, en vez de crear uno nuevo.

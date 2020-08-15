@@ -52,13 +52,13 @@ Envíe sus consultas a: soporte@superfactura.cl
 				options = JsonConvert.DeserializeObject(optionsJSON);
 			}
 
-			if (options.host != null)
+			if (options.url != null)
 			{
-				// Conexión a Servidor Local
-				api = new API((string)options.host, 9080);
+				// Conexión a un servidor local
+				api = new API((string)options.url, user, pass);
 			} else
 			{
-				// Conexión a la nube
+				// Conexión a la nube de SuperFactura
 				api = new API(user, pass);
 			}
 

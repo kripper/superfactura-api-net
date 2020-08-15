@@ -28,14 +28,8 @@ namespace SuperFactura
 			url = "https://superfactura.cl";
 		}
 
-		// Conexión al Servidor Local
-		public API(string host, int port)
-		{
-			url = "http://" + host + ":" + port;
-		}
-
 		// Conexión a un seridor específico
-		public API(string url, string user, string password)
+		public API(string url, string user = "", string password = "")
 		{
 			this.url = url;
 			this.user = user;
@@ -74,7 +68,7 @@ namespace SuperFactura
 		{
 			using (WebClient client = new WebClient())
 			{
-				byte[] response = client.UploadValues(url + "?a=json", new NameValueCollection()
+				byte[] response = client.UploadValues(url + "/?a=json", new NameValueCollection()
 				{
 					{ "user", user },
 					{ "pass", password },
