@@ -87,7 +87,8 @@ Envíe sus consultas a: soporte@superfactura.cl
 				api.AddOptions(optionsJSON);
 			}
 
-			string json = System.IO.File.ReadAllText(dteFile);
+			// string json = System.IO.File.ReadAllText(dteFile, System.Text.Encoding.GetEncoding("ISO-8859-1"));
+			string json = System.IO.File.ReadAllText(dteFile, System.Text.Encoding.Default);
 
 			try
 			{
@@ -101,6 +102,7 @@ Envíe sus consultas a: soporte@superfactura.cl
 			catch (Exception e)
 			{
 				// IMPORTANTE: Este mensaje se debe mostrar al usuario para poder darle soporte.
+				// OBS: Lo tiramos por StdOut (en vez de StdErr para asegurar de que sea capturado por los usuarios.
 				Console.WriteLine(e.Message);
 			}
 		}
