@@ -109,8 +109,6 @@ namespace SuperFactura
 		public APIResult SendDTE(string jsonData, string ambiente)
 		{
 			SetOption("ambiente", ambiente);
-			SetOption("encoding", "UTF-8");
-			SetOption("getXML", true);
 
 			APIResult apiResult = new APIResult();
 
@@ -160,6 +158,7 @@ namespace SuperFactura
 				apiResult.folio = folio;
 				apiResult.xml = (string)appRes.xml;
 				apiResult.escpos = (string)appRes.escpos;
+				apiResult.html = (string)appRes.html;
 
 				if (savePDF != null)
 				{
@@ -184,7 +183,7 @@ namespace SuperFactura
 			return apiResult;
 		}
 
-		private void WriteFile(string filename, byte[] content)
+		public void WriteFile(string filename, byte[] content)
 		{
 			using (BinaryWriter writer = new BinaryWriter(File.Open(filename, FileMode.Create)))
 			{
@@ -207,10 +206,11 @@ namespace SuperFactura
 
 	public class APIResult
 	{
-		public int folio; // Entrega el folio asignado al DTE.
+		public long folio; // Entrega el folio asignado al DTE.
 		public bool ok = false; // Indica que el DTE se generó correctamente.
 		public string xml;
 		public string escpos;
+		public string html;
 
 		public bool PrintEscPos(String port)
 		{

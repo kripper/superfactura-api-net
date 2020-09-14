@@ -46,13 +46,12 @@ Envíe sus consultas a: soporte@superfactura.cl
 
 			API api;
 			dynamic options = null;
-
 			if (optionsJSON != null)
 			{
 				options = JsonConvert.DeserializeObject(optionsJSON);
 			}
 
-			if (options.url != null)
+			if (options != null && options.url != null)
 			{
 				// Conexión a un servidor local
 				api = new API((string)options.url, user, pass);
@@ -63,6 +62,8 @@ Envíe sus consultas a: soporte@superfactura.cl
 			}
 
 			string printer = null;
+			string saveHTML = null;
+
 			if (options != null) {
 				if (options.savePDF != null)
 				{
@@ -78,6 +79,12 @@ Envíe sus consultas a: soporte@superfactura.cl
 				if (printer != null)
 				{
 					options["getEscPos"] = 1;
+				}
+
+				saveHTML = GetAndRemove(options, "saveHTML");
+				if(saveHTML != null)
+				{
+					options["getHTML"] = 1;
 				}
 			}
 
@@ -98,6 +105,11 @@ Envíe sus consultas a: soporte@superfactura.cl
 				Console.WriteLine("{\"ok\":" + (res.ok ? "true" : "false") + ",\"folio\":\"" + res.folio + "\"}");
 
 				if(printer != null) res.PrintEscPos(printer);
+
+				if (saveHTML != null)
+				{
+					api.WriteFile(saveHTML + ".html", System.Text.Encoding.Default.GetBytes(res.html));
+				}
 			}
 			catch (Exception e)
 			{
