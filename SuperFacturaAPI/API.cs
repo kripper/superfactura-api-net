@@ -159,6 +159,7 @@ namespace SuperFactura
 				apiResult.xml = (string)appRes.xml;
 				apiResult.escpos = (string)appRes.escpos;
 				apiResult.html = (string)appRes.html;
+				apiResult.htmlCedible = (string)appRes.htmlCedible;
 
 				if (savePDF != null)
 				{
@@ -211,6 +212,7 @@ namespace SuperFactura
 		public string xml;
 		public string escpos;
 		public string html;
+		public string htmlCedible;
 
 		public bool PrintEscPos(String port)
 		{

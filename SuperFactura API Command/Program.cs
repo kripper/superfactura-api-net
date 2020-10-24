@@ -109,6 +109,10 @@ Envíe sus consultas a: soporte@superfactura.cl
 				if (saveHTML != null)
 				{
 					api.WriteFile(saveHTML + ".html", System.Text.Encoding.Default.GetBytes(res.html));
+					if (res.htmlCedible != null)
+					{
+						api.WriteFile(saveHTML + "-cedible.html", System.Text.Encoding.Default.GetBytes(res.htmlCedible));
+					}
 				}
 			}
 			catch (Exception e)
