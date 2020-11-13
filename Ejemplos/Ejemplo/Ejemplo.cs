@@ -14,7 +14,8 @@ namespace Ejemplos
     {
         static void Main(string[] args)
         {
-            API api = new API("usuario@cliente.cl", "password");
+			API api = new API("usuario@cliente.cl", "password"); // Para conectar con servicio cloud
+			// API api = new API("http://127.0.0.1:9080"); // Para conectar con Servidor Local (servicio offline)
 
 			// Enviar documentID (importante para evitar documentos duplicados en caso de falla de red y reenvío):
 			// Si se envía un ID ya utilizado, se retornará el mismo documento, en vez de crear uno nuevo.

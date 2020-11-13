@@ -26,6 +26,7 @@ namespace SuperFactura
 			this.user = user;
 			this.password = password;
 			url = "https://superfactura.cl";
+			Init();
 		}
 
 		// Conexión a un seridor específico
@@ -34,6 +35,13 @@ namespace SuperFactura
 			this.url = url;
 			this.user = user;
 			this.password = password;
+			Init();
+		}
+
+		public void Init()
+		{
+			// .NET generalmente trabaja en UTF-8
+			SetOption("encoding", "UTF-8");
 		}
 
 		public void SetSavePDF(string outputFile)
