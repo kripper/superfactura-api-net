@@ -18,7 +18,7 @@ namespace SuperFactura
 		string savePDF = null;
 		string saveXML = null;
 
-		string url;
+		public string url;
 
 		// Conexión a la nube
 		public API(string user, string password)

@@ -19,7 +19,8 @@ namespace SuperFactura_API_Command
 
 			if (args.Length < 3)
 			{
-				Console.Error.WriteLine(@"
+				// Console.Error.WriteLine(@"
+				Console.WriteLine(@"
 Envia un archivo DTE en formato JSON al SII.
 
 SUPERFACTURA [usuario] [contraseña] [ambiente] [archivo] [opciones]
